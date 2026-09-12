@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Calendar macro SUA pentru traderii MES, MNQ, ES și NQ: date Fed, inflație, piața muncii, program CME și expirări până la 1 ianuarie 2027.">
+  <meta name="theme-color" content="#0a0d0f">
+  <title>US Index Desk — Calendar macro 2026</title>
+  <script>document.documentElement.dataset.theme=localStorage.getItem("calendar-theme")||("matchMedia" in window&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark")</script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0d0f'/%3E%3Cpath d='M14 44 27 31l8 7 15-20' fill='none' stroke='%23ffca58' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ticker" aria-label="Instrumente urmărite">
+    <div class="ticker__inner">
+      <span class="ticker__brand">US INDEX DESK</span>
+      <span><b>MES</b> Micro S&amp;P 500</span>
+      <span><b>MNQ</b> Micro Nasdaq-100</span>
+      <span><b>ES</b> E-mini S&amp;P 500</span>
+      <span><b>NQ</b> E-mini Nasdaq-100</span>
+      <span class="ticker__date" id="updatedLabel">ACTUALIZAT 12 SEP 2026</span>
+    </div>
+  </div>
+
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">MACRO · FED · CME · CASH SESSION</p>
+        <h1>Calendarul de risc<br><em>pentru indici SUA.</em></h1>
+      </div>
+      <div class="masthead__brief">
+        <p>Evenimentele care pot schimba lichiditatea, volatilitatea sau direcția pe MES, MNQ, ES și NQ.</p>
+        <p class="fineprint">12 septembrie 2026 — 1 ianuarie 2027 · orele se ajustează automat pentru DST.</p>
+      </div>
+    </header>
+
+    <section class="risk-strip" aria-label="Rezumatul următorului eveniment">
+      <div class="risk-strip__pulse" aria-hidden="true"></div>
+      <div>
+        <span class="micro-label">URMĂTORUL RISC MAJOR</span>
+        <button class="next-event" id="nextEventButton" type="button">Se calculează…</button>
+      </div>
+      <div class="countdown" id="countdown">—</div>
+    </section>
+
+    <section class="controls" aria-label="Filtre calendar">
+      <div class="month-nav">
+        <button class="icon-button" id="prevMonth" type="button" aria-label="Luna precedentă">←</button>
+        <div>
+          <span class="micro-label">LUNA AFIȘATĂ</span>
+          <strong id="monthTitle">Septembrie 2026</strong>
+        </div>
+        <button class="icon-button" id="nextMonth" type="button" aria-label="Luna următoare">→</button>
+      </div>
+
+      <div class="segmented" aria-label="Tip vizualizare">
+        <button type="button" data-view="calendar" class="is-active">Calendar</button>
+        <button type="button" data-view="agenda">Agendă</button>
+      </div>
+
+      <label class="select-wrap">
+        <span class="micro-label">ORA</span>
+        <select id="timezoneSelect">
+          <option value="Europe/Bucharest">București</option>
+          <option value="America/New_York">New York (ET)</option>
+        </select>
+      </label>
+
+      <div class="control-actions">
+        <button class="theme-button" id="themeButton" type="button"><span id="themeIcon" aria-hidden="true">☀</span><span id="themeLabel">Mod luminos</span></button>
+        <button class="export-button" id="exportButton" type="button">Exportă .ICS</button>
+      </div>
+    </section>
+
+    <section class="filters" aria-label="Filtre de impact și categorie">
+      <div class="filter-group" id="impactFilters">
+        <button type="button" data-impact="critical" class="filter is-active"><i class="dot dot--critical"></i> Critic</button>
+        <button type="button" data-impact="high" class="filter is-active"><i class="dot dot--high"></i> Ridicat</button>
+        <button type="button" data-impact="medium" class="filter is-active"><i class="dot dot--medium"></i> Mediu</button>
+        <button type="button" data-impact="schedule" class="filter is-active"><i class="dot dot--schedule"></i> Program</button>
+      </div>
+      <div class="filter-group filter-group--category" id="categoryFilters">
+        <button type="button" data-category="Fed" class="filter is-active">Fed</button>
+        <button type="button" data-category="Inflație" class="filter is-active">Inflație</button>
+        <button type="button" data-category="Muncă" class="filter is-active">Muncă</button>
+        <button type="button" data-category="Creștere" class="filter is-active">Creștere</button>
+        <button type="button" data-category="Piață" class="filter is-active">Piață</button>
+      </div>
+    </section>
+
+    <section class="calendar-card" id="calendarView">
+      <div class="weekday-row" aria-hidden="true">
+        <span>LUN</span><span>MAR</span><span>MIE</span><span>JOI</span><span>VIN</span><span>SÂM</span><span>DUM</span>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </section>
+
+    <section class="agenda" id="agendaView" hidden>
+      <div id="agendaList"></div>
+    </section>
+
+    <section class="desk-notes" aria-labelledby="deskNotesTitle">
+      <div class="section-heading">
+        <span class="section-number">01</span>
+        <h2 id="deskNotesTitle">Reguli rapide pentru zilele cu risc</h2>
+      </div>
+      <div class="notes-grid">
+        <article>
+          <span class="note-index">08:30 ET</span>
+          <h3>Fereastra de detonare</h3>
+          <p>CPI, NFP, PPI, PCE, GDP și retail sales apar frecvent înainte de cash open. Spreadul și slippage-ul pot crește instantaneu.</p>
+        </article>
+        <article>
+          <span class="note-index">14:00 ET</span>
+          <h3>Fed: două impulsuri</h3>
+          <p>Prima mișcare vine la comunicat; a doua poate apărea la conferința de presă de la 14:30 ET. Reacția inițială se poate inversa.</p>
+        </article>
+        <article>
+          <span class="note-index">HOLIDAY</span>
+          <h3>Lichiditatea contează</h3>
+          <p>Zilele cu obligațiuni închise, program scurt sau sesiuni dintre sărbători tind să aibă book mai subțire și mișcări mai puțin curate.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="sources" aria-labelledby="sourcesTitle">
+      <div class="section-heading">
+        <span class="section-number">02</span>
+        <h2 id="sourcesTitle">Surse și limitări</h2>
+      </div>
+      <div class="sources__layout">
+        <p>Datele confirmate provin din calendarele oficiale. Evenimentele marcate „recurent” sau „provizoriu” urmează tiparul normal, dar pot fi mutate. CME finalizează frecvent orele speciale cu aproximativ două săptămâni înainte de sărbătoare.</p>
+        <div class="source-links" id="sourceLinks"></div>
+      </div>
+      <p class="disclaimer">Instrument de planificare, nu recomandare financiară. Verifică sursa oficială înainte de o sesiune cu risc și regulile firmei/brokerului tău.</p>
+    </section>
+  </main>
+
+  <dialog class="event-dialog" id="eventDialog">
+    <form method="dialog"><button class="dialog-close" aria-label="Închide">×</button></form>
+    <div id="dialogContent"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
